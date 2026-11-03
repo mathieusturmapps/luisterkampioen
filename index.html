@@ -20,6 +20,7 @@
   --primary: #2F5FE0; --on-primary: #FFFFFF; --star: #F5A400; --star-off: #C7D6F0;
   --ok: #17804A; --ok-bg: #DDF4E6; --bad: #C23B30; --bad-bg: #FDE3E0; --hl: #FFE49A;
   --l1: #1F9D63; --l1-soft: #DDF4E8; --l2: #2F5FE0; --l2-soft: #DFE8FF; --l3: #7A4FE0; --l3-soft: #EAE2FF;
+  --l4: #B45309; --l4-soft: #FFE8D1; --l5: #0B7285; --l5-soft: #D3EFF4;
   --f-display: 'Fredoka', 'Baloo 2', system-ui, sans-serif;
   --f-body: 'Andika', 'Atkinson Hyperlegible', system-ui, sans-serif;
 }
@@ -29,6 +30,7 @@
     --primary: #7FA4FF; --on-primary: #0E1930; --star: #FFC531; --star-off: #2D4068;
     --ok: #55D69A; --ok-bg: #12382A; --bad: #FF8479; --bad-bg: #4A2022; --hl: #5A4A12;
     --l1: #4CD08A; --l1-soft: #12382A; --l2: #7FA4FF; --l2-soft: #1B2F5E; --l3: #B79BFF; --l3-soft: #2E2459;
+    --l4: #FFB066; --l4-soft: #4A2E12; --l5: #5CD4E8; --l5-soft: #12404A;
     color-scheme: dark;
   }
 }
@@ -37,6 +39,7 @@
   --primary: #7FA4FF; --on-primary: #0E1930; --star: #FFC531; --star-off: #2D4068;
   --ok: #55D69A; --ok-bg: #12382A; --bad: #FF8479; --bad-bg: #4A2022; --hl: #5A4A12;
   --l1: #4CD08A; --l1-soft: #12382A; --l2: #7FA4FF; --l2-soft: #1B2F5E; --l3: #B79BFF; --l3-soft: #2E2459;
+  --l4: #FFB066; --l4-soft: #4A2E12; --l5: #5CD4E8; --l5-soft: #12404A;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -52,6 +55,8 @@ p { margin: 0; }
 .lv1 { --lc: var(--l1); --ls: var(--l1-soft); }
 .lv2 { --lc: var(--l2); --ls: var(--l2-soft); }
 .lv3 { --lc: var(--l3); --ls: var(--l3-soft); }
+.lv4 { --lc: var(--l4); --ls: var(--l4-soft); }
+.lv5 { --lc: var(--l5); --ls: var(--l5-soft); }
 
 /* knoppen */
 .btn {
@@ -168,6 +173,23 @@ p { margin: 0; }
 .panel .chk input { width: 24px; height: 24px; }
 .muted { color: var(--muted); font-size: 0.95rem; }
 
+/* eigen verhaaltjes */
+.ed { display: flex; flex-direction: column; gap: 12px; }
+.ed label { font-weight: 700; }
+.ed input[type=text], .ed textarea, .panel input[type=password] {
+  font: inherit; width: 100%; min-width: 0; padding: 12px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.ed textarea { min-height: 180px; line-height: 1.6; resize: vertical; }
+.ed textarea#eprompt { min-height: 120px; font-size: 0.85rem; }
+.qedit { background: var(--bg); border: 2px solid var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.qh { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.box { background: var(--surface); border: 2px solid var(--line); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.emsg { min-height: 1.5em; font-weight: 700; }
+.emsg.bad { color: var(--bad); }
+.emsg.ok { color: var(--ok); }
+.tilewrap { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.tilewrap .tile { flex: 1; }
+
 @media (prefers-reduced-motion: reduce) {
   .opt.bad { animation: none; }
   .opt.reading { transform: none; }
@@ -188,7 +210,9 @@ p { margin: 0; }
   var LEVELS = [
     { id: 1, name: 'Niveau 1', tag: 'Begin eerste leerjaar', sub: 'Heel korte verhaaltjes. Je kiest het juiste plaatje.', icon: '🌱', rate: 0.72 },
     { id: 2, name: 'Niveau 2', tag: 'Einde eerste leerjaar', sub: 'Iets langere verhaaltjes met vier vragen.', icon: '🌿', rate: 0.8 },
-    { id: 3, name: 'Niveau 3', tag: 'Tweede leerjaar', sub: 'Echte verhalen. Let op het waarom en het einde.', icon: '🌳', rate: 0.85 }
+    { id: 3, name: 'Niveau 3', tag: 'Tweede leerjaar', sub: 'Echte verhalen. Let op het waarom en het einde.', icon: '🌳', rate: 0.85 },
+    { id: 4, name: 'Niveau 4', tag: 'Uitdaging', sub: 'Langere verhalen. Je moet goed nadenken en soms zelf iets afleiden.', icon: '🔥', rate: 0.9 },
+    { id: 5, name: 'Mijn verhaaltjes', tag: 'Zelf gemaakt', sub: 'Typ of plak een eigen tekst. De app leest ze voor en je maakt er vragen bij.', icon: '✏️', rate: 0.85, custom: true }
   ];
 
   // Bij elke vraag staat het juiste antwoord eerst. De app schudt de volgorde bij het tonen.
@@ -287,19 +311,56 @@ p { margin: 0; }
         { t: "Wat doen ze 's avonds?", src: 1, o: [['🔥', 'Ze braden worsten boven het kampvuur.'], ['🏊', 'Ze gaan zwemmen.'], ['📺', 'Ze kijken tv.']] },
         { t: 'Wat hoort Kato midden in de nacht?', src: 3, o: [['🔊', 'een raar geluid'], ['🎵', 'muziek'], ['⏰', 'de wekker']] },
         { t: 'Wat blijkt het geluid te zijn?', src: 6, o: [['🦔', 'een egel'], ['👻', 'een spook'], ['🌬️', 'de wind']] }
+      ] },
+
+    { id: 'vuurtoren', level: 4, title: 'De vuurtoren in de mist', pic: '🗼',
+      s: ['Aan de rand van de zee staat een hoge vuurtoren.', 'Vuurtorenwachter Gilles woont er al dertig jaar.', 'Elke avond draait hij het grote licht aan.', 'Zo zien de schepen waar de gevaarlijke rotsen liggen.', 'Op een nacht komt er plots dikke mist.', 'Gilles kan de zee bijna niet meer zien.', 'Dan hoort hij ver weg een scheepshoorn.', 'Een klein vissersbootje is de weg kwijt.', 'Gilles laat het licht flikkeren en blaast op zijn eigen hoorn.', 'Langzaam komt het bootje dichterbij.', 'Net voor de rotsen draait de visser bij en vaart veilig de haven in.', 'De volgende ochtend brengt de visser een mand verse vis naar de toren.', 'Gilles glimlacht en zet meteen de pan op het vuur.'],
+      q: [
+        { t: 'Waarom draait Gilles elke avond het grote licht aan?', src: 3, o: [['', 'Zo zien de schepen waar de rotsen liggen.'], ['', 'Hij is bang in het donker.'], ['', 'Hij wil vissen lokken.']] },
+        { t: 'Wat gebeurt er op een nacht?', src: 4, o: [['', 'Er komt dikke mist.'], ['', 'Er komt een storm met bliksem.'], ['', 'Het licht valt uit.']] },
+        { t: 'Hoe weet Gilles dat er een bootje in de buurt is?', src: 6, o: [['', 'Hij hoort een scheepshoorn.'], ['', 'Hij ziet het bootje door een kijker.'], ['', 'De visser belt hem op.']] },
+        { t: 'Wat doet Gilles om te helpen?', src: 8, o: [['', 'Hij laat het licht flikkeren en blaast op zijn hoorn.'], ['', 'Hij vaart zelf naar buiten.'], ['', 'Hij roept de brandweer.']] },
+        { t: 'Waarom brengt de visser een mand vis naar de toren?', src: 11, o: [['', 'Om Gilles te bedanken.'], ['', 'Omdat hij de vis zelf niet lust.'], ['', 'Omdat Gilles de vis moet verkopen.']] }
+      ] },
+    { id: 'omar', level: 4, title: 'De nieuwe leerling', pic: '🎒',
+      s: ['Op maandag komt er een nieuwe leerling in de klas van meester Tim.', 'Hij heet Omar en komt uit een ander land.', 'Omar spreekt nog niet zo goed Nederlands.', 'In de pauze staat hij alleen op de speelplaats.', 'Lena ziet dat en gaat naar hem toe.', 'Ze toont hem haar springtouw en leert hem touwtjespringen.', 'Omar lacht voor het eerst die dag.', 'Daarna leert hij Lena een spel uit zijn oude school.', 'Ze tekenen samen vakjes met krijt op de grond.', 'Andere kinderen komen nieuwsgierig kijken.', 'Al snel spelen er tien kinderen mee.', 'Aan het einde van de dag zegt Omar in het Nederlands dat hij morgen weer komt.', 'Die avond vertelt hij zijn mama dat hij een vriendin heeft gemaakt.'],
+      q: [
+        { t: 'Waarom staat Omar alleen op de speelplaats?', src: 3, o: [['', 'Hij kent nog niemand.'], ['', 'Hij wil liever alleen zijn.'], ['', 'Hij heeft geen zin om te spelen.']] },
+        { t: 'Wat doet Lena als ze Omar ziet?', src: 5, o: [['', 'Ze gaat naar hem toe en leert hem touwtjespringen.'], ['', 'Ze lacht met hem.'], ['', 'Ze roept de meester.']] },
+        { t: 'Wat leert Omar aan Lena?', src: 7, o: [['', 'een spel uit zijn oude school'], ['', 'een liedje in zijn taal'], ['', 'een kooktruc']] },
+        { t: 'Wat gebeurt er nadat de andere kinderen komen kijken?', src: 10, o: [['', 'Al snel spelen er tien kinderen mee.'], ['', 'De meester verbiedt het spel.'], ['', 'Het begint te regenen.']] },
+        { t: 'Hoe voelt Omar zich op het einde van de dag?', src: 12, o: [['😊', 'blij'], ['😠', 'boos'], ['😢', 'verdrietig']] }
+      ] },
+    { id: 'koekjes', level: 4, title: 'De verdwenen koekjes', pic: '🍪',
+      s: ['Op zaterdagochtend bakt oma een bakplaat vol koekjes.', 'Ze zet de koekjes op de vensterbank om af te koelen.', 'Daarna gaat ze even naar de tuin om de bloemen water te geven.', 'Als ze terugkomt, zijn de koekjes weg.', 'Er liggen alleen nog kruimels op de vensterbank.', 'Oma volgt de kruimels door de gang.', 'Ze lopen tot onder de tafel in de living.', 'Daar zit kleinzoon Bas met chocolade rond zijn mond.', 'Oma doet alsof ze niets ziet.', 'Ze vraagt of hij misschien weet wie de koekjes heeft opgegeten.', 'Bas wordt rood en zegt zacht dat hij maar één koekje wilde proeven.', 'Oma lacht en zegt dat hij de volgende keer gewoon moet vragen.', 'Samen bakken ze een nieuwe bakplaat koekjes.'],
+      q: [
+        { t: 'Waar zet oma de koekjes om af te koelen?', src: 1, o: [['', 'op de vensterbank'], ['', 'op het aanrecht'], ['', 'in de koekjesdoos']] },
+        { t: 'Hoe komt oma te weten waar de koekjes naartoe zijn?', src: 5, o: [['', 'Ze volgt de kruimels.'], ['', 'Ze vraagt het aan de buurman.'], ['', 'Ze ziet het door het raam.']] },
+        { t: 'Welk bewijs heeft oma dat Bas de koekjes nam?', src: 7, o: [['', 'Hij heeft chocolade rond zijn mond.'], ['', 'Hij heeft een lege doos in zijn hand.'], ['', 'Hij vertelt het meteen zelf.']] },
+        { t: 'Waarom wordt Bas rood?', src: 10, o: [['', 'Hij schaamt zich.'], ['', 'Hij heeft het warm.'], ['', 'Hij is boos op oma.']] },
+        { t: 'Wat moet Bas de volgende keer doen?', src: 11, o: [['', 'gewoon vragen'], ['', 'de koekjes verstoppen'], ['', 'zelf koekjes bakken']] }
+      ] },
+    { id: 'vogeltrek', level: 4, title: 'De trek van de vogels', pic: '🐦',
+      s: ['In de herfst vliegen veel vogels naar warme landen.', 'Dat noemen we de vogeltrek.', 'In ons land wordt het dan koud en vinden de vogels minder eten.', 'Zwaluwen eten insecten, maar in de winter zijn er bijna geen insecten meer.', 'Daarom vliegen zwaluwen duizenden kilometers naar Afrika.', 'Ze vliegen vaak samen in grote groepen.', 'Onderweg rusten ze op daken, draden en in bomen.', 'In het voorjaar komen de zwaluwen terug.', 'Dan bouwen ze nesten van modder onder de daken van huizen en stallen.', 'Sommige vogels blijven de hele winter bij ons, zoals de mus en de merel.', 'Zij vinden genoeg zaad en besjes om te eten.', 'Als je in de winter vogels wilt helpen, kan je vetbollen ophangen in de tuin.'],
+      q: [
+        { t: 'Waarom vliegen veel vogels in de herfst weg?', src: 2, o: [['', 'Het wordt koud en er is minder eten.'], ['', 'Ze vinden het saai.'], ['', 'Ze zijn bang voor de regen.']] },
+        { t: 'Waar vliegen de zwaluwen naartoe?', src: 4, o: [['', 'naar Afrika'], ['', 'naar Noorwegen'], ['', 'naar Amerika']] },
+        { t: 'Waarvan maken zwaluwen hun nest?', src: 8, o: [['', 'modder'], ['', 'takjes'], ['', 'veren']] },
+        { t: 'Welke vogels blijven in de winter bij ons?', src: 9, o: [['', 'de mus en de merel'], ['', 'de zwaluw en de ooievaar'], ['', 'alle vogels']] },
+        { t: 'Hoe kan je vogels in de winter helpen?', src: 11, o: [['', 'vetbollen ophangen'], ['', 'brood in de vijver gooien'], ['', 'ze binnen laten']] }
       ] }
   ];
 
   /* ---------- Opslag (per toestel) ---------- */
   var KEY = 'luisterkampioen.v1';
-  var mem = { stars: {}, settings: {} };
+  var mem = { stars: {}, settings: {}, custom: [] };
   try {
     var raw = localStorage.getItem(KEY);
-    if (raw) { var d = JSON.parse(raw); mem.stars = d.stars || {}; mem.settings = d.settings || {}; }
+    if (raw) { var d = JSON.parse(raw); mem.stars = d.stars || {}; mem.settings = d.settings || {}; mem.custom = d.custom || []; }
   } catch (e) { /* zonder opslag werkt de app gewoon verder */ }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) { /* negeren */ } }
-  var S = Object.assign({ speed: 'normal', showText: false, voice: '' }, mem.settings);
-  function saveSettings() { mem.settings = { speed: S.speed, showText: S.showText, voice: S.voice }; save(); }
+  var S = Object.assign({ speed: 'normal', showText: false, voice: '', apiKey: '' }, mem.settings);
+  function saveSettings() { mem.settings = { speed: S.speed, showText: S.showText, voice: S.voice, apiKey: S.apiKey }; save(); }
 
   /* ---------- Voorlezen ---------- */
   var synth = ('speechSynthesis' in window) ? window.speechSynthesis : null;
@@ -317,11 +378,31 @@ p { margin: 0; }
     if (voices.length || voicesChecked) return 'nonl';
     return 'ok';
   }
+  // Vlaamse stemmen (nl-BE) eerst, dan Nederlandse. Natuurlijke of online stemmen krijgen voorrang.
+  function voiceScore(v) {
+    var l = v.lang || '', s = 0;
+    if (/^nl[-_]BE/i.test(l)) s += 100; else if (/^nl/i.test(l)) s += 50; else return -1;
+    if (/natural|neural|online|enhanced|premium|siri/i.test(v.name || '')) s += 20;
+    return s;
+  }
+  function rankedVoices() {
+    return voices.map(function (v) { return { v: v, s: voiceScore(v) }; })
+      .filter(function (x) { return x.s >= 0; })
+      .sort(function (a, b) { return b.s - a.s; })
+      .map(function (x) { return x.v; });
+  }
   function pickVoice() {
     if (S.voice) { var f = voices.find(function (v) { return v.voiceURI === S.voice; }); if (f) return f; }
-    return voices.find(function (v) { return /^nl[-_]BE/i.test(v.lang); }) ||
-           voices.find(function (v) { return /^nl/i.test(v.lang); }) || null;
+    return rankedVoices()[0] || null;
   }
+  function voiceStatusText() {
+    var b = pickVoice();
+    if (!b) return 'Geen Nederlandse stem gevonden. iPad: Instellingen, Toegankelijkheid, Gesproken inhoud, Stemmen, Nederlands, en download Ellen (België). Android: Instellingen, Tekst-naar-spraak, Google, en installeer Nederlands (België).';
+    if (/^nl[-_]BE/i.test(b.lang)) return 'Vlaamse stem in gebruik: ' + b.name + '.';
+    return 'Geen Vlaamse stem gevonden. Nu wordt een Nederlandse stem gebruikt (' + b.name + '). Voor een Vlaamse stem: iPad, Instellingen, Toegankelijkheid, Gesproken inhoud, Stemmen, Nederlands, Ellen (België). Android: installeer Nederlands (België) bij Google Tekst-naar-spraak. Windows met Edge: kies een Online (Natural) stem zoals Arnaud of Dena.';
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function allStories() { return STORIES.concat(mem.custom); }
   var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
   var runId = 0;
   function stopSpeech() { runId++; try { if (synth) synth.cancel(); } catch (e) { /* negeren */ } }
@@ -363,7 +444,7 @@ p { margin: 0; }
   var $ = function (s) { return document.querySelector(s); };
   var app = document.getElementById('app');
   var view = { name: 'home' };
-  function story() { return STORIES.find(function (s) { return s.id === view.sid; }); }
+  function story() { return allStories().find(function (s) { return s.id === view.sid; }); }
   function level() { return LEVELS[view.lid - 1]; }
   function rate() { return level().rate * (S.speed === 'slow' ? 0.8 : 1); }
   function starsOf(id) { return mem.stars[id] || 0; }
@@ -389,12 +470,12 @@ p { margin: 0; }
 
   function homeHTML() {
     var cards = LEVELS.map(function (lv) {
-      var list = STORIES.filter(function (s) { return s.level === lv.id; });
+      var list = allStories().filter(function (s) { return s.level === lv.id; });
       var got = list.reduce(function (a, s) { return a + starsOf(s.id); }, 0);
       return '<button class="card lv' + lv.id + '" data-act="level" data-id="' + lv.id + '">' +
         '<span class="ic" aria-hidden="true">' + lv.icon + '</span>' +
         '<span class="tx"><span class="nm">' + lv.name + '</span><span class="sb">' + lv.tag + '</span><span class="sb">' + lv.sub + '</span></span>' +
-        '<span class="pr" aria-label="' + got + ' van ' + list.length * 3 + ' sterren">★ ' + got + '/' + list.length * 3 + '</span></button>';
+        '<span class="pr">' + (lv.custom ? list.length + (list.length === 1 ? ' verhaal' : ' verhalen') : '★ ' + got + '/' + list.length * 3) + '</span></button>';
     }).join('');
     return '<header class="top"><div class="brand"><span aria-hidden="true">🎧</span> Luisterkampioen</div>' +
       '<span class="pill" aria-label="' + totalStars() + ' sterren verdiend"><b>★</b> ' + totalStars() + '</span>' +
@@ -407,12 +488,17 @@ p { margin: 0; }
 
   function levelHTML() {
     var lv = level();
-    var tiles = STORIES.filter(function (s) { return s.level === lv.id; }).map(function (s) {
-      return '<button class="tile" data-act="story" data-id="' + s.id + '">' +
-        '<span class="pc" aria-hidden="true">' + s.pic + '</span><span class="tt">' + s.title + '</span>' + starsHTML(starsOf(s.id)) + '</button>';
+    var list = allStories().filter(function (s) { return s.level === lv.id; });
+    var tiles = list.map(function (s) {
+      var t = '<button class="tile" data-act="story" data-id="' + s.id + '">' +
+        '<span class="pc" aria-hidden="true">' + s.pic + '</span><span class="tt">' + esc(s.title) + '</span>' + starsHTML(starsOf(s.id)) + '</button>';
+      return lv.custom ? '<div class="tilewrap">' + t + '<button class="btn small" data-act="edit" data-id="' + s.id + '">✎ Aanpassen</button></div>' : t;
     }).join('');
+    var extra = lv.custom ? '<button class="btn big primary" data-act="newstory">＋ Nieuw verhaaltje maken</button>' +
+      (list.length ? '' : '<p class="lead">Je hebt nog geen eigen verhaaltjes. Typ of plak een tekst en maak er vragen bij.</p>') : '';
     return topbar('Terug naar het begin', lv.name + ' · ' + lv.tag) +
-      '<div class="lv' + lv.id + '"><h1>Kies een verhaaltje</h1></div><div class="stories lv' + lv.id + '">' + tiles + '</div>';
+      '<div class="lv' + lv.id + '"><h1>' + (lv.custom ? 'Mijn verhaaltjes' : 'Kies een verhaaltje') + '</h1></div>' + extra +
+      '<div class="stories lv' + lv.id + '">' + tiles + '</div>';
   }
 
   function bannerHTML() {
@@ -425,9 +511,9 @@ p { margin: 0; }
 
   function storyHTML() {
     var st = story();
-    var sents = st.s.map(function (z, i) { return '<span class="sent" data-i="' + i + '">' + z + '</span>'; }).join(' ');
+    var sents = st.s.map(function (z, i) { return '<span class="sent" data-i="' + i + '">' + esc(z) + '</span>'; }).join(' ');
     return topbar('Terug naar de verhaaltjes', level().name) +
-      '<section class="storyhead lv' + st.level + '"><div class="pic" aria-hidden="true">' + st.pic + '</div><h1>' + st.title + '</h1></section>' +
+      '<section class="storyhead lv' + st.level + '"><div class="pic" aria-hidden="true">' + st.pic + '</div><h1>' + esc(st.title) + '</h1></section>' +
       '<div id="banner">' + bannerHTML() + '</div>' +
       '<div class="player">' +
         '<button id="playbtn" class="btn big primary" data-act="play"></button>' +
@@ -470,7 +556,7 @@ p { margin: 0; }
       var wrong = view.wrong.indexOf(idx) >= 0;
       var ok = view.locked && idx === 0;
       return '<button class="opt' + (wrong ? ' bad' : '') + (ok ? ' ok' : '') + '" data-act="answer" data-i="' + idx + '"' + ((wrong || view.locked) ? ' disabled' : '') + '>' +
-        '<span class="oe" aria-hidden="true">' + o[0] + '</span><span class="ot">' + o[1] + '</span>' +
+        (o[0] ? '<span class="oe" aria-hidden="true">' + o[0] + '</span>' : '') + '<span class="ot">' + esc(o[1]) + '</span>' +
         '<span class="mk" aria-hidden="true">' + (ok ? '✓' : wrong ? '✗' : '') + '</span></button>';
     }).join('');
   }
@@ -479,9 +565,9 @@ p { margin: 0; }
     var dots = st.q.map(function (_, i) {
       return '<span class="dot ' + (i < view.qi ? (view.res[i] ? 'good' : 'miss') : (i === view.qi ? 'cur' : '')) + '"></span>';
     }).join('');
-    return topbar('Terug naar het verhaal', st.title) +
+    return topbar('Terug naar het verhaal', esc(st.title)) +
       '<div class="prog"><span class="lbl">Vraag ' + (view.qi + 1) + ' van ' + st.q.length + '</span>' + dots + '</div>' +
-      '<section class="qcard"><p class="qt">' + q.t + '</p>' +
+      '<section class="qcard"><p class="qt">' + esc(q.t) + '</p>' +
         '<button class="btn small" data-act="rehear"><span aria-hidden="true">🔊</span> Nog eens horen</button></section>' +
       '<div id="opts" class="opts ' + (st.level === 1 ? 'pics' : 'list') + '">' + optsHTML() + '</div>' +
       '<p id="fb" class="fb" role="status" aria-live="polite"></p>' +
@@ -537,7 +623,7 @@ p { margin: 0; }
     view.tries++; view.wrong.push(idx);
     if (view.tries === 1) {
       paintOpts(); setFb('Dat klopt niet. Luister nog eens.', 'bad');
-      var ok = await readSentences(['Dat klopt niet. Luister nog eens.', st.s[q.src], 'Probeer het nog eens.'], r);
+      var ok = await readSentences(['Dat klopt niet. Luister nog eens.', st.s[q.src], 'Probeer het nog eens.'].filter(Boolean), r);
       if (ok) setFb('Probeer het nog eens.', '');
     } else {
       view.locked = true; view.res[view.qi] = false;
@@ -558,7 +644,7 @@ p { margin: 0; }
     var st = story();
     var msg = view.stars === 3 ? 'Super! Alles goed!' : view.stars === 2 ? 'Goed gedaan!' : 'Mooi geprobeerd!';
     var sub = view.stars === 3 ? 'Je bent een echte luisterkampioen.' : 'Luister nog eens naar het verhaal en probeer opnieuw voor meer sterren.';
-    var idx = STORIES.indexOf(st), nxt = STORIES[idx + 1];
+    var all = allStories(), idx = all.indexOf(st), nxt = all[idx + 1];
     var hasNext = nxt && nxt.level === st.level;
     return '<section class="result lv' + st.level + '"><div style="font-size:3.5rem" aria-hidden="true">' + st.pic + '</div>' +
       starsHTML(view.stars) + '<h1>' + msg + '</h1>' +
@@ -570,23 +656,128 @@ p { margin: 0; }
       '</div>';
   }
 
+  /* ---------- Eigen verhaaltjes ---------- */
+  function words(s) { return String(s).toLowerCase().split(/[^a-zà-ÿ0-9]+/).filter(function (w) { return w.length >= 4; }); }
+  function splitSentences(text) {
+    var m = String(text).replace(/\s+/g, ' ').trim().match(/[^.!?…]+[.!?…]*["')»]*/g) || [];
+    return m.map(function (z) { return z.trim(); }).filter(Boolean);
+  }
+  function blankQ() { return { t: '', a: '', w1: '', w2: '' }; }
+  function isEmptyQ(q) { return !(q.t.trim() || q.a.trim() || q.w1.trim() || q.w2.trim()); }
+  function guessSrc(sents, q) {
+    var aw = words(q.a), qw = words(q.t), best = -1, bs = 0;
+    sents.forEach(function (z, i) {
+      var zw = words(z), sc = 0;
+      aw.forEach(function (w) { if (zw.indexOf(w) >= 0) sc += 2; });
+      qw.forEach(function (w) { if (zw.indexOf(w) >= 0) sc += 1; });
+      if (sc > bs) { bs = sc; best = i; }
+    });
+    return best;
+  }
+  function fld(label, f, i, val) {
+    var id = 'f-' + f + '-' + i;
+    return '<label for="' + id + '">' + label + '</label><input type="text" id="' + id + '" data-f="' + f + '" data-i="' + i + '" value="' + esc(val) + '">';
+  }
+  function editHTML() {
+    var qs = view.qs.map(function (q, i) {
+      return '<section class="qedit"><div class="qh"><b>Vraag ' + (i + 1) + '</b><button class="btn small" data-act="delq" data-i="' + i + '">Verwijder</button></div>' +
+        fld('Vraag', 't', i, q.t) + fld('Juist antwoord', 'a', i, q.a) + fld('Fout antwoord 1', 'w1', i, q.w1) + fld('Fout antwoord 2', 'w2', i, q.w2) + '</section>';
+    }).join('');
+    return topbar('Terug naar mijn verhaaltjes', 'Eigen verhaaltje') + '<div class="ed">' +
+      '<h1>' + (view.sid ? 'Verhaaltje aanpassen' : 'Nieuw verhaaltje') + '</h1>' +
+      '<label for="etitle">Titel</label><input type="text" id="etitle" value="' + esc(view.title) + '">' +
+      '<label for="etext">Verhaal</label><textarea id="etext">' + esc(view.text) + '</textarea>' +
+      '<p class="muted">Schrijf korte zinnen. De app leest elke zin apart voor. Na een fout antwoord herhaalt ze de zin waarin het antwoord staat.</p>' +
+      '<div class="box"><h2>Vragen</h2>' + qs + '<button class="btn small" data-act="addq">＋ Vraag toevoegen</button></div>' +
+      '<div class="box"><h2>Vragen laten maken door Claude</h2>' +
+        (S.apiKey ? '<button class="btn" data-act="aigen">Maak vragen met Claude</button>' :
+          '<p class="muted">Geen API-sleutel ingesteld (zie ⚙). Je kan ook de opdracht kopiëren, in een gesprek met Claude plakken en het antwoord hieronder terugplakken.</p>') +
+        '<button class="btn" data-act="copyprompt">Kopieer opdracht voor Claude</button>' +
+        '<textarea id="eprompt" readonly hidden aria-label="Opdracht voor Claude"></textarea>' +
+        '<label for="epaste">Antwoord van Claude plakken</label><textarea id="epaste">' + esc(view.paste) + '</textarea>' +
+        '<button class="btn" data-act="importjson">Vragen inlezen</button></div>' +
+      '<p id="emsg" class="emsg" role="status"></p>' +
+      '<button class="btn big primary" data-act="savestory">Bewaar verhaaltje</button>' +
+      (view.sid ? '<div id="delwrap"><button class="btn small" data-act="delask">Verhaaltje verwijderen</button></div>' : '') +
+      '</div>';
+  }
+  function msg(t, kind) { var m = $('#emsg'); if (m) { m.textContent = t; m.className = 'emsg ' + (kind || ''); } }
+  function buildPrompt(title, text) {
+    return 'Je helpt bij een oefenapp voor begrijpend luisteren voor kinderen van het eerste en tweede leerjaar in Vlaanderen.\n' +
+      'Maak 4 meerkeuzevragen bij het verhaaltje hieronder.\n' +
+      'Regels:\n- Het juiste antwoord staat letterlijk of duidelijk in het verhaal.\n' +
+      '- Elke vraag heeft 1 juist en 2 foute antwoorden. De foute antwoorden zijn aannemelijk, maar volgens het verhaal duidelijk fout.\n' +
+      '- Korte vragen en antwoorden in eenvoudig Vlaams Nederlands.\n' +
+      '- Wissel af tussen wie, wat, waar en waarom. Stel minstens één vraag over het einde.\n' +
+      'Antwoord enkel met JSON in dit formaat, zonder extra tekst:\n' +
+      '[{"vraag":"...","juist":"...","fout":["...","..."]}]\n\n' +
+      'Titel: ' + (title || '') + '\nVerhaal:\n' + text;
+  }
+  function applyQuestions(text) {
+    var a = text.indexOf('['), b = text.lastIndexOf(']');
+    if (a < 0 || b < a) throw new Error('Geen vragen gevonden in het antwoord');
+    var arr = JSON.parse(text.slice(a, b + 1));
+    var out = arr.map(function (x) {
+      var f = x.fout || x.fouten || [];
+      return { t: String(x.vraag || x.t || '').trim(), a: String(x.juist || x.a || '').trim(), w1: String(f[0] || '').trim(), w2: String(f[1] || '').trim() };
+    }).filter(function (q) { return q.t && q.a && q.w1 && q.w2; });
+    if (!out.length) throw new Error('De vragen waren niet volledig');
+    view.qs = view.qs.filter(function (q) { return !isEmptyQ(q); }).concat(out);
+    render();
+    msg(out.length + ' vragen toegevoegd. Lees ze na en bewaar het verhaaltje.', 'ok');
+  }
+  async function aiGenerate() {
+    var sents = splitSentences(view.text);
+    if (!sents.length) { msg('Schrijf of plak eerst het verhaal.', 'bad'); return; }
+    msg('Claude maakt de vragen…', '');
+    try {
+      var r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-api-key': S.apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ model: 'claude-sonnet-5-5', max_tokens: 1500, messages: [{ role: 'user', content: buildPrompt(view.title, view.text) }] })
+      });
+      if (!r.ok) throw new Error('foutcode ' + r.status);
+      var d = await r.json();
+      applyQuestions((d.content || []).map(function (c) { return c.text || ''; }).join(''));
+    } catch (e) { msg('Het lukte niet (' + e.message + '). Controleer de sleutel en de internetverbinding.', 'bad'); }
+  }
+  function saveStory() {
+    var title = view.title.trim(), sents = splitSentences(view.text), built = [];
+    if (!title) { msg('Geef het verhaaltje een titel.', 'bad'); return; }
+    if (!sents.length) { msg('Schrijf of plak eerst het verhaal.', 'bad'); return; }
+    for (var i = 0; i < view.qs.length; i++) {
+      var q = view.qs[i];
+      if (isEmptyQ(q)) continue;
+      if (!(q.t.trim() && q.a.trim() && q.w1.trim() && q.w2.trim())) { msg('Vraag ' + (i + 1) + ' is nog niet volledig. Vul de vraag en drie antwoorden in.', 'bad'); return; }
+      built.push({ t: q.t.trim(), src: guessSrc(sents, q), o: [['', q.a.trim()], ['', q.w1.trim()], ['', q.w2.trim()]] });
+    }
+    if (!built.length) { msg('Voeg minstens één vraag toe.', 'bad'); return; }
+    var obj = { id: view.sid || 'c' + Date.now(), level: 5, title: title, pic: '📖', s: sents, q: built };
+    var at = mem.custom.findIndex(function (c) { return c.id === obj.id; });
+    if (at >= 0) mem.custom[at] = obj; else mem.custom.push(obj);
+    save();
+    go({ name: 'level', lid: 5 });
+  }
+
   /* ---------- Instellingen voor ouders ---------- */
   function sheetHTML() {
-    var nl = voices.filter(function (v) { return /^nl/i.test(v.lang); });
-    var list = nl.length ? nl : voices;
-    var opts = '<option value="">Automatisch (Nederlands of Vlaams)</option>' + list.map(function (v) {
-      return '<option value="' + v.voiceURI + '"' + (S.voice === v.voiceURI ? ' selected' : '') + '>' + v.name + ' (' + v.lang + ')</option>';
+    var list = rankedVoices(); if (!list.length) list = voices;
+    var opts = '<option value="">Automatisch (beste Vlaamse stem)</option>' + list.map(function (v) {
+      return '<option value="' + esc(v.voiceURI) + '"' + (S.voice === v.voiceURI ? ' selected' : '') + '>' + (/^nl[-_]BE/i.test(v.lang) ? 'Vlaams · ' : '') + esc(v.name) + ' (' + esc(v.lang) + ')</option>';
     }).join('');
     return '<div class="sheet" id="sheet"><div class="panel" role="dialog" aria-modal="true" aria-labelledby="sttl">' +
       '<h2 id="sttl">Instellingen voor ouders</h2>' +
       (synth ? '<div><label for="voicesel">Stem</label><select id="voicesel">' + opts + '</select></div>' +
+        '<p class="muted" id="vstat">' + voiceStatusText() + '</p>' +
         '<button class="btn small" data-act="testvoice">🔊 Proefstem</button>' :
         '<p class="muted">Dit toestel kan niet voorlezen.</p>') +
       '<fieldset><legend>Snelheid</legend>' +
         '<label class="chk"><input type="radio" name="speed" value="slow"' + (S.speed === 'slow' ? ' checked' : '') + '> Traag</label>' +
         '<label class="chk"><input type="radio" name="speed" value="normal"' + (S.speed === 'normal' ? ' checked' : '') + '> Gewoon</label></fieldset>' +
       '<label class="chk"><input type="checkbox" id="showtext"' + (S.showText ? ' checked' : '') + '> De tekst van het verhaal standaard tonen</label>' +
-      '<p class="muted">Sterren en instellingen worden alleen op dit toestel bewaard.</p>' +
+      '<div><label for="apikey">Anthropic API-sleutel (optioneel)</label><input id="apikey" type="password" autocomplete="off" value="' + esc(S.apiKey) + '">' +
+        '<p class="muted">Alleen nodig om bij eigen verhaaltjes automatisch vragen te laten maken. De sleutel blijft op dit toestel, in de opslag van de browser.</p></div>' +
+      '<p class="muted">Sterren, eigen verhaaltjes en instellingen worden alleen op dit toestel bewaard.</p>' +
       '<div id="resetwrap"><button class="btn small" data-act="resetask">Alle sterren wissen</button></div>' +
       '<button class="btn primary" data-act="closesettings">Klaar</button></div></div>';
   }
@@ -601,13 +792,14 @@ p { margin: 0; }
     else if (view.name === 'story') h = storyHTML();
     else if (view.name === 'quiz') h = quizHTML();
     else if (view.name === 'result') h = resultHTML();
+    else if (view.name === 'edit') h = editHTML();
     app.innerHTML = h;
     if (view.name === 'story') paintStory();
     if (view.name === 'quiz' && view.locked) showNext();
   }
   function go(v) { stopSpeech(); view = v; render(); window.scrollTo(0, 0); }
   function openStory(id) {
-    var st = STORIES.find(function (s) { return s.id === id; });
+    var st = allStories().find(function (s) { return s.id === id; });
     go({ name: 'story', sid: id, lid: st.level, showText: S.showText || voiceState() !== 'ok', listened: false, playing: false, tok: 0, cur: -1 });
   }
 
@@ -623,6 +815,7 @@ p { margin: 0; }
         else if (view.name === 'story') go({ name: 'level', lid: view.lid });
         else if (view.name === 'quiz') openStory(view.sid);
         else if (view.name === 'result') go({ name: 'level', lid: view.lid });
+        else if (view.name === 'edit') go({ name: 'level', lid: 5 });
         break;
       case 'play': if (view.playing) { view.tok++; stopSpeech(); view.playing = false; view.cur = -1; paintStory(); } else playStory(); break;
       case 'speed': S.speed = S.speed === 'slow' ? 'normal' : 'slow'; saveSettings(); paintStory(); break;
@@ -633,6 +826,33 @@ p { margin: 0; }
       case 'next':
         if (view.qi >= story().q.length - 1) finishQuiz();
         else { stopSpeech(); view.qi++; newQuestion(); render(); readQuestion(); window.scrollTo(0, 0); }
+        break;
+      case 'newstory': go({ name: 'edit', sid: null, title: '', text: '', qs: [blankQ()], paste: '' }); break;
+      case 'edit':
+        var c = mem.custom.find(function (x) { return x.id === el.getAttribute('data-id'); });
+        if (c) go({ name: 'edit', sid: c.id, title: c.title, text: c.s.join(' '), paste: '',
+          qs: c.q.map(function (q) { return { t: q.t, a: q.o[0][1], w1: q.o[1][1], w2: q.o[2][1] }; }) });
+        break;
+      case 'addq': view.qs.push(blankQ()); render(); break;
+      case 'delq': view.qs.splice(+el.getAttribute('data-i'), 1); if (!view.qs.length) view.qs.push(blankQ()); render(); break;
+      case 'savestory': saveStory(); break;
+      case 'aigen': aiGenerate(); break;
+      case 'importjson':
+        try { applyQuestions(view.paste); } catch (err) { msg('Inlezen mislukt: ' + err.message + '.', 'bad'); }
+        break;
+      case 'copyprompt':
+        var ta = $('#eprompt'); ta.value = buildPrompt(view.title, view.text);
+        var okMsg = 'Opdracht gekopieerd. Plak ze in een gesprek met Claude en plak het antwoord hieronder terug.';
+        var failMsg = function () { ta.hidden = false; ta.focus(); ta.select(); msg('Kopiëren lukte niet. Kopieer de opdracht hieronder zelf.', 'bad'); };
+        try { navigator.clipboard.writeText(ta.value).then(function () { msg(okMsg, 'ok'); }, failMsg); } catch (err2) { failMsg(); }
+        break;
+      case 'delask':
+        $('#delwrap').innerHTML = '<p class="muted">Zeker weten? Het verhaaltje verdwijnt.</p><div class="row"><button class="btn small" data-act="delyes">Ja, verwijderen</button><button class="btn small" data-act="delno">Nee</button></div>';
+        break;
+      case 'delno': $('#delwrap').innerHTML = '<button class="btn small" data-act="delask">Verhaaltje verwijderen</button>'; break;
+      case 'delyes':
+        mem.custom = mem.custom.filter(function (x) { return x.id !== view.sid; }); delete mem.stars[view.sid]; save();
+        go({ name: 'level', lid: 5 });
         break;
       case 'settings': openSettings(); break;
       case 'closesettings': closeSettings(); if (view.name === 'home') render(); break;
@@ -649,6 +869,15 @@ p { margin: 0; }
     if (t.id === 'voicesel') { S.voice = t.value; saveSettings(); }
     else if (t.name === 'speed') { S.speed = t.value; saveSettings(); }
     else if (t.id === 'showtext') { S.showText = t.checked; saveSettings(); }
+    else if (t.id === 'apikey') { S.apiKey = t.value.trim(); saveSettings(); }
+  });
+  document.addEventListener('input', function (e) {
+    if (view.name !== 'edit') return;
+    var t = e.target, f = t.getAttribute && t.getAttribute('data-f');
+    if (t.id === 'etitle') view.title = t.value;
+    else if (t.id === 'etext') view.text = t.value;
+    else if (t.id === 'epaste') view.paste = t.value;
+    else if (f) view.qs[+t.getAttribute('data-i')][f] = t.value;
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('#sheet')) closeSettings(); });
 
